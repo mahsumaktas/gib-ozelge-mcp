@@ -1,0 +1,9 @@
+# Render.com Blueprint - https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: gib-mevzuat-mcp
+    runtime: docker
+    plan: free
+    region: frankfurt
+    healthCheckPath: /healthz
+    autoDeploy: true
