@@ -377,9 +377,17 @@ def main() -> None:
     2026-07-28 MCP spec'inin stateless cekirdegi ile uyumlu. Endpoint: /mcp
     """
     if os.environ.get("PORT") or os.environ.get("MCP_HTTP"):
+        from mcp.server.transport_security import TransportSecuritySettings
+
         mcp.settings.host = "0.0.0.0"
         mcp.settings.port = int(os.environ.get("PORT", "8080"))
         mcp.settings.stateless_http = True
+        # DNS rebinding korumasi lokal sunuculari tarayici saldirisindan korur;
+        # public modda Host kisiti istegi 421 ile dusurur (Render/Fly domain'i
+        # localhost listesinde degil) - kapatilmali.
+        mcp.settings.transport_security = TransportSecuritySettings(
+            enable_dns_rebinding_protection=False
+        )
         mcp.run(transport="streamable-http")
     else:
         mcp.run()

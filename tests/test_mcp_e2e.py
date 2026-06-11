@@ -78,6 +78,28 @@ def test_streamable_http_handshake_and_tool_call():
         health = httpx.get(f"http://127.0.0.1:{port}/healthz")
         assert health.status_code == 200 and health.text == "ok"
 
+        # Public mod: yabanci Host basligi 421 YEMEMELI (reverse proxy arkasinda
+        # gercek domain ile gelir; DNS rebinding korumasi public modda kapali)
+        init_body = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "initialize",
+            "params": {
+                "protocolVersion": "2025-03-26",
+                "capabilities": {},
+                "clientInfo": {"name": "probe", "version": "0"},
+            },
+        }
+        foreign = httpx.post(
+            f"http://127.0.0.1:{port}/mcp",
+            json=init_body,
+            headers={
+                "Host": "ornek-public-domain.onrender.com",
+                "Accept": "application/json, text/event-stream",
+            },
+        )
+        assert foreign.status_code != 421, "yabanci Host 421 yedi: public mod kirik"
+
         url = f"http://127.0.0.1:{port}/mcp"
         async with streamablehttp_client(url) as (read, write, _):
             async with ClientSession(read, write) as session:
